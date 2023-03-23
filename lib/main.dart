@@ -1,13 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:instagram/widget/shop.dart';
 import 'style.dart' as style;
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'notification.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(
     MultiProvider(
       providers: [
@@ -75,80 +83,80 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
 
-    initNotification(context);
+    //initNotification(context);
     getData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showNotification2();
-          },
-          child: const Text('+'),
-        ),
-        appBar: AppBar(
-          elevation: 1,
-          iconTheme: Theme.of(context).appBarTheme.actionsIconTheme,
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          title: Text('Instagram',
-              style: Theme.of(context).appBarTheme.titleTextStyle),
-          actions: [
-            IconButton(
-              onPressed: () async {
-                var picker = ImagePicker();
-                var image = await picker.pickImage(source: ImageSource.gallery);
+    MediaQuery.of(context).size.width;
 
-                if (image != null) {
-                  setState(() {
-                    userImage = File(image.path);
-                  });
-                }
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (c) => Upload(
-                        userImage: userImage,
-                        setUserContent: setUserContent,
-                        addMyData: addMyData),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add_box_outlined),
-            ),
-          ],
-        ),
-        body: Contents(data: data),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(boxShadow: [
-            BoxShadow(
-              color: Colors.grey,
-              blurRadius: 1,
-            )
-          ]),
-          child: BottomNavigationBar(
-              iconSize: 25,
-              backgroundColor:
-                  style.theme.bottomNavigationBarTheme.backgroundColor,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              onTap: (i) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showNotification2();
+        },
+        child: const Text('+'),
+      ),
+      appBar: AppBar(
+        elevation: 1,
+        iconTheme: Theme.of(context).appBarTheme.actionsIconTheme,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        title: Text('Instagram',
+            style: Theme.of(context).appBarTheme.titleTextStyle),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              var picker = ImagePicker();
+              var image = await picker.pickImage(source: ImageSource.gallery);
+
+              if (image != null) {
                 setState(() {
-                  tab = i;
+                  userImage = File(image.path);
                 });
-              },
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined,
-                        color: style
-                            .theme.bottomNavigationBarTheme.selectedItemColor),
-                    label: 'home'),
-                const BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_bag_outlined), label: 'shop'),
-              ]),
-        ),
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (c) => Upload(
+                      userImage: userImage,
+                      setUserContent: setUserContent,
+                      addMyData: addMyData),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add_box_outlined),
+          ),
+        ],
+      ),
+      body: [Contents(data: data), const Shop()][tab],
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(boxShadow: [
+          BoxShadow(
+            color: Colors.grey,
+            blurRadius: 1,
+          )
+        ]),
+        child: BottomNavigationBar(
+            iconSize: 25,
+            backgroundColor:
+                style.theme.bottomNavigationBarTheme.backgroundColor,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            onTap: (i) {
+              setState(() {
+                tab = i;
+              });
+            },
+            items: [
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.home_outlined,
+                      color: style
+                          .theme.bottomNavigationBarTheme.selectedItemColor),
+                  label: 'home'),
+              const BottomNavigationBarItem(
+                  icon: Icon(Icons.shopping_bag_outlined), label: 'shop'),
+            ]),
       ),
     );
   }
